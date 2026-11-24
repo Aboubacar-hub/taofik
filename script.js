@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 4. Lightbox for gallery & service photos
-  const zoomableImgs = Array.from(document.querySelectorAll('.gallery-item img, .service-img, .service-img-duo img'));
+  const zoomableImgs = Array.from(document.querySelectorAll('.gallery-item img, .service-img, .service-img-duo img, .service-gallery img'));
   if (zoomableImgs.length) {
     const lb = document.createElement('div');
     lb.className = 'lightbox';
