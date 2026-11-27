@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         galleryItems.forEach(item => {
           const match = cat === 'all' || item.dataset.cat === cat;
           item.classList.toggle('hidden', !match);
+          if (match) item.classList.add('visible');
         });
       });
     });
