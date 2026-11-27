@@ -125,15 +125,70 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'ArrowRight') showImage(currentIdx + 1);
     });
   }
-});
+  // 5. Real email submission via FormSubmit (no PHP backend needed)
+  const devisForm = document.getElementById('devis-form');
+  if (devisForm && devisForm.tagName === 'FORM') {
+    const submitBtn = devisForm.querySelector('.form-submit');
+    const feedback = document.getElementById('formFeedback');
+    const defaultBtnText = submitBtn ? submitBtn.textContent : 'Envoyer ma demande de devis →';
 
-function submitForm(btn) {
-  btn.textContent = '✓ Demande envoyée – Réponse sous 24h !';
-  btn.style.background = '#3D6B4A';
-  btn.style.color = '#fff';
-  setTimeout(() => {
-    btn.textContent = 'Envoyer ma demande de devis →';
-    btn.style.background = '';
-    btn.style.color = '';
-  }, 5000);
-}
+    devisForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (devisForm.querySelector('[name="_honey"]')?.value) return;
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Envoi en cours...';
+      }
+      if (feedback) {
+        feedback.className = 'form-feedback';
+        feedback.textContent = '';
+      }
+
+      const payload = {};
+      new FormData(devisForm).forEach((val, key) => {
+        payload[key] = val;
+      });
+
+      try {
+        const res = await fetch('https://formsubmit.co/ajax/multiservice31@yahoo.fr', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.success === 'false' || data.success === false) {
+          throw new Error(data.message || 'Erreur lors de l’envoi');
+        }
+        if (feedback) {
+          feedback.className = 'form-feedback ok';
+          feedback.textContent = '✓ Votre demande de devis a bien été envoyée ! Nous vous répondons sous 24h.';
+        }
+        if (submitBtn) {
+          submitBtn.textContent = '✓ Demande envoyée !';
+          submitBtn.style.background = '#3D6B4A';
+          submitBtn.style.color = '#fff';
+        }
+        devisForm.reset();
+      } catch (err) {
+        if (submitBtn) submitBtn.textContent = defaultBtnText;
+        if (feedback) {
+          feedback.className = 'form-feedback err';
+          feedback.innerHTML = 'L’envoi automatique n’a pas abouti pour le moment. Contactez-nous directement au <a href="tel:0645244857" style="color:#E5CE89;font-weight:600">06 45 24 48 57</a> ou par email à <a href="mailto:multiservice31@yahoo.fr" style="color:#E5CE89;font-weight:600">multiservice31@yahoo.fr</a>.';
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          setTimeout(() => {
+            submitBtn.textContent = defaultBtnText;
+            submitBtn.style.background = '';
+            submitBtn.style.color = '';
+          }, 5000);
+        }
+      }
+    });
+  }
+});
